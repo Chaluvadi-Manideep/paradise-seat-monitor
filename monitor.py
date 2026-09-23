@@ -198,7 +198,7 @@ def main():
                     "🚨 THE PARADISE SEATS AVAILABLE!\n\n"
                     "ALLU Cinemas: Kokapet\n"
                     "24 Sep 2026 • 10:40 PM\n"
-                    f"Seats: {\", ".join(sorted(TARGET_SEATS))}\n\n"
+                    f"Seats: {', '.join(sorted(TARGET_SEATS))}\n\n"
                     "Book them now:\n" + SHOW_URL
                 )
                 state["alert_sent"] = True
