@@ -9,7 +9,7 @@ from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeo
 
 SHOW_URL = "https://in.bookmyshow.com/cinemas/hyderabad/allu-cinemas-kokapet/buytickets/ALUC/20260924"
 TARGET_TIME = "10:40 PM"
-TARGET_SEATS = {"G7", "G8", "G9"}
+TARGET_SEATS = {s.strip().upper() for s in os.getenv("TARGET_SEATS", "G7,G8,G9").split(",") if s.strip()}
 IST = ZoneInfo("Asia/Kolkata")
 STATE_FILE = Path("state/alert_state.json")
 
@@ -198,7 +198,7 @@ def main():
                     "🚨 THE PARADISE SEATS AVAILABLE!\n\n"
                     "ALLU Cinemas: Kokapet\n"
                     "24 Sep 2026 • 10:40 PM\n"
-                    "Seats: G7, G8, G9\n\n"
+                    f"Seats: {\", \".join(sorted(TARGET_SEATS))}\n\n"
                     "Book them now:\n" + SHOW_URL
                 )
                 state["alert_sent"] = True
