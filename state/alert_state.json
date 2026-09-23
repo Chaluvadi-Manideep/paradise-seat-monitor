@@ -1,5 +1,5 @@
 {
   "alert_sent": false,
-  "last_status": "not_started",
-  "last_checked": null
+  "last_status": "error: RuntimeError",
+  "last_checked": "2026-09-23T18:31:31.840258+05:30"
 }
