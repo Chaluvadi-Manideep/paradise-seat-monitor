@@ -1,26 +1,19 @@
-# Paradise Seat Monitor
+Paradise seat monitor patch
 
-Cloud monitor for:
+This patch replaces the blocked cinema-listing scrape with BookMyShow's direct
+seat-layout flow. The monitor opens the target seat-layout page, turns on the
+site's accessibility seat view, selects the GOLD category and M row, and reads
+the structured seat table. It does not click seats and never enters checkout.
 
-- Movie: The Paradise
-- Cinema: ALLU Cinemas: Kokapet
-- Date: 24 September 2026
-- Show: 10:40 PM
-- Target seats: G7, G8, G9
-- Polling: every 5 minutes through GitHub Actions
-- Notification: Telegram
+Copy `monitor.py` and `requirements.txt` to the repository root, and replace
+`.github/workflows/seat-monitor.yml` with `seat-monitor.yml` from this folder.
+Keep the existing `telegram-test.yml` unchanged.
 
-## Required GitHub Secrets
+The direct URL currently contains session `5299`. If BookMyShow rotates that
+session for a republished show, update the `BOOKMYSHOW_SEAT_LAYOUT_URL`
+repository variable or edit the default in `monitor.py`.
 
-Add these repository secrets:
-
-- TELEGRAM_BOT_TOKEN
-- TELEGRAM_CHAT_ID
-
-Never put either value directly into source code.
-
-## Important
-
-The monitor does not purchase tickets. It only detects the target seats and sends a Telegram notification.
-
-BookMyShow uses a dynamic seat-selection interface, so the workflow saves a diagnostic screenshot if the page structure changes or the seat map cannot be reached.
+The monitor reports `available`, `unavailable`, or `unknown`; only three
+`available` values trigger Telegram. State is committed to
+`state/alert_state.json`, duplicate alerts are suppressed, and the flag resets
+after a later check sees a seat unavailable.
