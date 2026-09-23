@@ -1,4 +1,5 @@
 import json
+import json
 import os
 import re
 from datetime import datetime
@@ -120,29 +121,39 @@ def visible_seat_state(page, seat_name):
 
 def open_show(page):
     page.goto(SHOW_URL, wait_until="domcontentloaded", timeout=60000)
-    page.wait_for_timeout(5000)
+    page.wait_for_timeout(8000)
 
     # Dismiss common overlays without depending on a single selector.
-    for text in ["Got it", "Accept", "Continue", "Allow"]:
+    for text_value in ["Got it", "Accept", "Continue", "Allow"]:
         try:
-            page.get_by_text(text, exact=True).first.click(timeout=1500)
+            page.get_by_text(text_value, exact=True).first.click(timeout=1500)
         except Exception:
             pass
 
-    # Select the exact 10:40 PM show.
-    show = page.get_by_text(TARGET_TIME, exact=True)
+    # BookMyShow can render the showtime with whitespace split across elements.
+    # Use a regex instead of requiring one exact text node.
+    time_pattern = re.compile(r"10\\s*:\\s*40\\s*PM", re.IGNORECASE)
+    show = page.get_by_text(time_pattern)
+    
     if show.count() == 0:
-        # Fallback: the page may have rendered the show in a button/card.
-        show = page.locator("text=" + TARGET_TIME)
+        show = page.locator("a, button, [role='button']").filter(has_text=time_pattern)
 
     if show.count() == 0:
-        raise RuntimeError(f"Could not find {TARGET_TIME} on the BookMyShow listing page.")
+        # Save the rendered text in the exception so the next run tells us
+        # whether BookMyShow returned a different page or changed its markup.
+        body_text = page.locator("body").inner_text(timeout=5000)
+        preview = normalize(body_text)[:2000]
+        raise RuntimeError(
+            f"Could not find {TARGET_TIME} on the BookMyShow listing page. "
+            f"Rendered page preview: {preview}"
+        )
 
     clicked = False
-    for i in range(min(show.count(), 5)):
+    for i in range(min(show.count(), 10)):
         try:
             candidate = show.nth(i)
             if candidate.is_visible():
+                candidate.scroll_into_view_if_needed()
                 candidate.click(timeout=5000)
                 clicked = True
                 break
