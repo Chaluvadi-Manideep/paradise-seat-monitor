@@ -3,7 +3,6 @@ name: Paradise Seat Monitor
 on:
   schedule:
     - cron: "*/5 * * * *"
-      timezone: "Asia/Kolkata"
   workflow_dispatch:
 
 permissions:
@@ -17,31 +16,25 @@ jobs:
   monitor:
     runs-on: ubuntu-latest
     timeout-minutes: 5
-
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
-      - name: Install dependencies
+      - name: Install browser dependency
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           python -m playwright install --with-deps chromium
-
-      - name: Check seats
+      - name: Check target seats
         env:
+          TARGET_SEATS: "M15,M16,M17"
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python monitor.py
-
-      - name: Persist alert state
+      - name: Persist monitor state
         if: always()
         run: |
           git config user.name "paradise-seat-monitor[bot]"
@@ -49,8 +42,7 @@ jobs:
           git add state/alert_state.json
           git diff --cached --quiet || git commit -m "chore: persist monitor state"
           git push || true
-
-      - name: Upload diagnostic screenshot
+      - name: Upload diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
         with:
