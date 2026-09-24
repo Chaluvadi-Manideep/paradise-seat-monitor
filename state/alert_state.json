@@ -1,5 +1,5 @@
 {
   "alert_sent": false,
-  "last_status": "error: RuntimeError",
-  "last_checked": "2026-09-24T17:44:26.575809+05:30"
+  "last_status": "expired",
+  "last_checked": "2026-09-24T22:48:16.760168+05:30"
 }
